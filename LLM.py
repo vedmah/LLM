@@ -23,6 +23,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Hero Section
+st.title("Multi-LLM Chat")
+ 
 ## ==================== CONFIGURATION ====================
 st.sidebar.header("🔧 Configuration")
 st.sidebar.markdown("### API Keys (Add yours)")
