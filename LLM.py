@@ -37,7 +37,7 @@ groq_key = st.sidebar.text_input("Groq API Key", type="password")
 # Model selector
 selected_model = st.selectbox(
     "Choose LLM:",
-    ["openai", "gemini", "groq", "claude"],
+    ["General Assistant", "Document Q&A", " Code Helper", "Medical Info","Legal Assistant"," Finance Advisor","Creative Writer" ],
     help="Select which model to use for responses"
 )
 
