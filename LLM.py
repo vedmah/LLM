@@ -34,8 +34,7 @@ selected_model = st.selectbox(
     openai_key = st.sidebar.text_input("OpenAI API Key", type="password"),
     gemini_key = st.sidebar.text_input("Gemini API Key", type="password"),
     anthropic_key = st.sidebar.text_input("Anthropic (Claude) API Key", type="password"),
-    groq_key = st.sidebar.text_input("Groq API Key", type="password"),
-
+    groq_key = st.sidebar.text_input("Groq API Key", type="password"), 
     help="Select which model to use for responses"
 )
 
