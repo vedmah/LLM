@@ -26,23 +26,20 @@ st.markdown("""
 # Hero Section
 st.title("Multi-LLM Chat")
  
-## ==================== CONFIGURATION ====================
 st.sidebar.header("🔧 Configuration")
-st.sidebar.markdown("### API Keys (Add yours)")
-selected_model = st.selectbox(
-    "Choose API:",
-    [openai_key = st.sidebar.text_input("OpenAI API Key", type="password"),
-    gemini_key = st.sidebar.text_input("Gemini API Key", type="password"),
-    anthropic_key = st.sidebar.text_input("Anthropic (Claude) API Key", type="password"),
-    groq_key = st.sidebar.text_input("Groq API Key", type="password"), 
-    help="Select which model to use for responses"],   
-)
 
-# Model selector
-selected_model = st.selectbox(
-    "Choose LLM:",
-    ["General Assistant", "Document Q&A", " Code Helper", "Medical Info","Legal Assistant"," Finance Advisor","Creative Writer" ],
-    help="Select which model to use for responses"
+# API Keys - Individual lines (CRITICAL FIX)
+openai_key = st.sidebar.text_input("🔑 OpenAI", type="password")
+gemini_key = st.sidebar.text_input("🔑 Gemini", type="password")
+anthropic_key = st.sidebar.text_input("🔑 Claude", type="password")
+groq_key = st.sidebar.text_input("🔑 Groq", type="password")
+
+st.sidebar.markdown("---")
+
+# Model selector - Clean list (NO assignments inside)
+selected_model = st.sidebar.selectbox(
+    "Choose LLM:", 
+    ["gpt-4o-mini", "gemini-pro", "claude-3-5-sonnet-20241022", "llama3-groq-70b-8192-tool-use-preview"]
 )
 
  
