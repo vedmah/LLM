@@ -27,8 +27,8 @@ st.markdown("""
 st.title("Multi-LLM Chat")
  
 st.subheader("🤖 LLM Selection")
-    provider_options = ["OpenAI", "Gemini", "Claude", "Groq"]
-    provider = st.selectbox("Provider:", provider_options, key="provider")
+provider_options = ["OpenAI", "Gemini", "Claude", "Groq"]
+provider = st.selectbox("Provider:", provider_options, key="provider")        
     
     model_options = {
         "OpenAI": ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"],
