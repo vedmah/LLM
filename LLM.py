@@ -31,11 +31,11 @@ st.sidebar.header("🔧 Configuration")
 st.sidebar.markdown("### API Keys (Add yours)")
 selected_model = st.selectbox(
     "Choose API:",
-    openai_key = st.sidebar.text_input("OpenAI API Key", type="password"),
+    [openai_key = st.sidebar.text_input("OpenAI API Key", type="password"),
     gemini_key = st.sidebar.text_input("Gemini API Key", type="password"),
     anthropic_key = st.sidebar.text_input("Anthropic (Claude) API Key", type="password"),
     groq_key = st.sidebar.text_input("Groq API Key", type="password"), 
-    help="Select which model to use for responses"
+    help="Select which model to use for responses"],   
 )
 
 # Model selector
