@@ -28,8 +28,9 @@ st.title("Multi-LLM Chat")
         
     
 # Model selector - Clean list (NO assignments inside)
-st.header("Configuration")
+
 selected_model = st.sidebar.selectbox(
+    st.header("Configuration")
     "Choose LLM:", 
     ["gpt-4o-mini", "gemini-pro", "claude-3-5-sonnet-20241022", "llama3-groq-70b-8192-tool-use-preview"]
 )
