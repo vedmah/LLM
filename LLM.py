@@ -25,18 +25,7 @@ st.markdown("""
 
 # Hero Section
 st.title("Multi-LLM Chat")
- 
-st.subheader("🤖 LLM Selection")
-provider_options = ["OpenAI", "Gemini", "Claude", "Groq"]
-provider = st.selectbox("Provider:", provider_options, key="provider")        
-    
-model_options = {
-        "OpenAI": ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"],
-        "Gemini": ["gemini-1.5-flash", "gemini-1.5-pro"],
-        "Claude": ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229"],
-        "Groq": ["llama-3.1-70b-versatile", "mixtral-8x7b-32768"]
-}
-selected_model = st.selectbox("Model:", model_options[provider], key="model")        
+        
     
 # Model selector - Clean list (NO assignments inside)
 selected_model = st.sidebar.selectbox(
