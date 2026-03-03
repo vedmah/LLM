@@ -27,6 +27,7 @@ st.markdown("""
 st.title("Multi-LLM Chat")
  
 st.sidebar.header("🔧 Configuration")
+st.selectbox("Provider:", provider_options, key="provider")
 
 # API Keys - Individual lines (CRITICAL FIX)
 openai_key = st.sidebar.text_input("🔑 OpenAI", type="password")
