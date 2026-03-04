@@ -41,15 +41,19 @@ selected_model = st.sidebar.selectbox(
 )
 
 st.sidebar.header("📁 Files Upload")   
-uploaded_files = st.sidebar.file_uploader(  
-    type=["pdf", "png", "jpg", "jpeg", "txt", "zip"],
-    accept_multiple_files=True
-)     
-if uploaded_files:
-        for file in uploaded_files:
-            st.success(f"✅ {file.name} ({file.size/1024:.1f} KB)")
-        st.session_state.uploaded_files = uploaded_files    
+uploaded_files = st.file_uploader(
+        "Upload Files:",
+        type=["pdf", "png", "jpg", "jpeg", "txt", "zip"],
+        accept_multiple_files=True,
+        help="Supports PDFs, Images, Text, ZIP folders"
+    )
     
+    if uploaded_files:
+        for file in uploaded_files:
+            st.success(f"✅ {file.name} ({file.size/1024:.1f}KB)")
+        st.session_state.uploaded_files = uploaded_files
+    else:
+        st.info("👆 Upload files for analysis")
      
 
 ## ==================== CHAT HISTORY MANAGEMENT ====================
