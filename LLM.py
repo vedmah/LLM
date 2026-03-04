@@ -45,7 +45,7 @@ selected_model = st.sidebar.selectbox(
     "Choose Files:",
     ["PDF", "Images", "TXT", "ZIP for folders"]
 )
-    uploaded_files = st.file_uploader(
+uploaded_files = st.file_uploader( 
         "Upload files (PDF, Images, TXT, ZIP for folders)", 
         accept_multiple_files=True,
         type=['pdf', 'png', 'jpg', 'jpeg', 'txt', 'zip']
@@ -55,6 +55,8 @@ selected_model = st.sidebar.selectbox(
         for file in uploaded_files:
             st.success(f"✅ {file.name} ({file.size/1024:.1f} KB)")
         st.session_state.uploaded_files = uploaded_files
+    
+     
 
 ## ==================== CHAT HISTORY MANAGEMENT ====================
 @st.cache_data
