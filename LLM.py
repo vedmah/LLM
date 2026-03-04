@@ -41,11 +41,12 @@ selected_model = st.sidebar.selectbox(
 )
 
 st.sidebar.header("📁 Files Upload")   
-# CORRECT: Use st.file_uploader() for file uploads
-uploaded_files = st.sidebar.file_uploader(  
+uploaded_files = st.sidebar.file_uploader(
+    "📁 Upload Files",  
     type=["pdf", "png", "jpg", "jpeg", "txt", "zip"],
     accept_multiple_files=True
 )
+
 
 if uploaded_files:
         for file in uploaded_files:
