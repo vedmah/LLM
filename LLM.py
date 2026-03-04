@@ -54,12 +54,12 @@ if uploaded_files:
         st.session_state.uploaded_files = uploaded_files
 
 st.subheader("🔍 Custom Prompt")
-    custom_prompt = st.text_area(
+custom_prompt = st.text_area( 
         "Enter custom system prompt (optional):",
         placeholder="e.g., 'You are a Python expert who explains code clearly...'",
         height=100,
         key="custom_prompt"
-    )
+) 
          
     
 
