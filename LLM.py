@@ -40,8 +40,7 @@ selected_model = st.sidebar.selectbox(
     [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"]       
 )
 
-st.sidebar.header("📁 Files Upload")
-
+st.sidebar.header("📁 Files Upload") 
 uploaded_files = st.sidebar.selectbox( 
         "Upload files (PDF, Images, TXT, ZIP for folders)", 
         accept_multiple_files=True,
