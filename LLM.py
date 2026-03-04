@@ -43,7 +43,7 @@ selected_model = st.sidebar.selectbox(
 st.sidebar.header("📁 Files Upload") 
 uploaded_files = st.sidebar.selectbox(
     "Choose File:",
-    ["pdf", "png", "jpg", "jpeg", "txt", "zip"]
+    ["pdf", "png", "jpg", "jpeg", "txt", "zip"],
     accept_multiple_files=True,      
 )  
     
