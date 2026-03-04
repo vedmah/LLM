@@ -55,11 +55,15 @@ if uploaded_files:
 
 st.subheader("🔍 Custom Prompt")
 custom_prompt = st.text_area( 
-        "Enter custom system prompt (optional):",
+        "Enter custom system prompt :",
         placeholder="e.g., 'You are a Python expert who explains code clearly...'",
         height=100,
         key="custom_prompt"
 ) 
+if 'uploaded_files' in st.session_state:
+        st.info(f"📊 {len(st.session_state.uploaded_files)} files ready for analysis")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
          
     
 
