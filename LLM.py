@@ -37,7 +37,7 @@ selected_model = st.sidebar.selectbox(
 st.sidebar.header("🎭 Chat Mode")
 selected_model = st.sidebar.selectbox(
     "Choose Mode:",
-    mode_options = [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"]       
+    [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"]       
 )   
     
 
