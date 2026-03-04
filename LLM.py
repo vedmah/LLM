@@ -38,8 +38,13 @@ st.sidebar.header("🎭 Chat Mode")
 selected_model = st.sidebar.selectbox(
     "Choose Mode:",
     [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"]       
-)   
-    
+)
+
+st.sidebar.header("📁 Files Upload")
+selected_model = st.sidebar.selectbox(
+    "Choose Files:",
+    ["PDF", "Images", "TXT", "ZIP for folders"]
+)    
 
 ## ==================== CHAT HISTORY MANAGEMENT ====================
 @st.cache_data
