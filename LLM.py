@@ -44,8 +44,7 @@ st.sidebar.header("📁 Files Upload")
 uploaded_files = st.sidebar.selectbox(
     "Choose File:",
     ["pdf", "png", "jpg", "jpeg", "txt", "zip"]
-    accept_multiple_files=True,
-    type=['pdf', 'png', 'jpg', 'jpeg', 'txt', 'zip']
+    accept_multiple_files=True,      
 )  
     
 if uploaded_files:
