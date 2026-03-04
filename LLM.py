@@ -35,9 +35,10 @@ selected_model = st.sidebar.selectbox(
 )
 
 st.sidebar.header("🎭 Chat Mode")
-mode_options = [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"] 
-selected_mode = st.selectbox("Mode:", mode_options, key="mode") 
-   
+selected_model = st.sidebar.selectbox(
+    mode_options = [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"] 
+    selected_mode = st.selectbox("Mode:", mode_options, key="mode") 
+)   
     
 
 ## ==================== CHAT HISTORY MANAGEMENT ====================
