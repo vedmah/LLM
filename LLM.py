@@ -40,19 +40,15 @@ selected_model = st.sidebar.selectbox(
     [" General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"]       
 )
 
-st.sidebar.header("📁 Files Upload") 
-# CORRECT: Use st.file_uploader() for file uploads
-uploaded_files = st.sidebar.file_uploader(
-    "📁 Upload Files:",
+st.sidebar.header("📁 Files Upload")   
+uploaded_files = st.sidebar.file_uploader(  
     type=["pdf", "png", "jpg", "jpeg", "txt", "zip"],
     accept_multiple_files=True
-)
-
-    
+)     
 if uploaded_files:
         for file in uploaded_files:
             st.success(f"✅ {file.name} ({file.size/1024:.1f} KB)")
-        st.session_state.uploaded_files = uploaded_files    
+            st.session_state.uploaded_files = uploaded_files    
     
      
 
