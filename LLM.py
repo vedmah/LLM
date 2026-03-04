@@ -51,7 +51,7 @@ if uploaded_files:
         for file in uploaded_files:
             st.success(f"✅ {file.name} ({file.size/1024:.1f}KB)")
         st.session_state.uploaded_files = uploaded_files
-    else:
+else: 
         st.info("👆 Upload files for analysis")
          
     
