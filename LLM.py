@@ -62,7 +62,7 @@ custom_prompt = st.text_area(
 ) 
 if 'uploaded_files' in st.session_state:
         st.info(f"📊 {len(st.session_state.uploaded_files)} files ready for analysis")
-st.markdown('</div>', unsafe_allow_html=True)    
+    
     
          
     
