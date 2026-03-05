@@ -53,18 +53,7 @@ if uploaded_files:
             st.success(f"✅ {file.name} ({file.size/1024:.1f} KB)")
         st.session_state.uploaded_files = uploaded_files
 
-st.subheader("🔍 Custom Prompt")
-custom_prompt = st.text_area( 
-        "Enter custom system prompt :",
-        placeholder="e.g., 'You are a Python expert who explains code clearly...'",
-        height=100,
-        key="custom_prompt"
-) 
-if 'uploaded_files' in st.session_state:
-        st.info(f"📊 {len(st.session_state.uploaded_files)} files ready for analysis")
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+ 
 
 # Chat container
 chat_container = st.container()
