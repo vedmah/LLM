@@ -62,7 +62,24 @@ custom_prompt = st.text_area(
 ) 
 if 'uploaded_files' in st.session_state:
         st.info(f"📊 {len(st.session_state.uploaded_files)} files ready for analysis")
-    
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Chat container
+chat_container = st.container()
+
+with chat_container:
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            
+            # Regenerate button for assistant messages
+            if message["role"] == "assistant":
+                if st.button("🔄 Regenerate", key=f"regen_{len(st.session_state.messages)}"):
+                    st.session_state.messages.pop()
+                    st.rerun()    
     
          
     
