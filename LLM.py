@@ -30,18 +30,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # ==================== SIDEBAR CONFIGURATION ====================
-st.sidebar.header("🔧 Configuration")
-
-# API Keys (Expandable)
-with st.sidebar.expander("🔑 API Keys", expanded=False):
-    openai_key = st.sidebar.text_input("OpenAI", type="password", key="openai_key")
-    gemini_key = st.sidebar.text_input("Gemini", type="password", key="gemini_key")
-    claude_key = st.sidebar.text_input("Claude", type="password", key="claude_key")
-    groq_key = st.sidebar.text_input("Groq", type="password", key="groq_key")
-
-st.sidebar.divider()
-
-# Model selector - FIXED variable name conflict
+st.sidebar.header("🔧 Configuration")   
 selected_llm = st.sidebar.selectbox(
     "🤖 Choose LLM:", 
     ["gpt-4o-mini (OpenAI)", "gemini-1.5-flash (Gemini)", "claude-3-5-sonnet-20241022 (Claude)", "llama3-8b-8192 (Groq)"]
