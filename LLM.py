@@ -81,7 +81,7 @@ if prompt := st.chat_input("💭 Ask anything about your files or general questi
     with chat_container:
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
-            full_response = generate_response(
+            full_response = st.generate_response(
                 prompt, selected_model, provider, 
                 openai_key, gemini_key, claude_key, groq_key,
                 selected_mode, custom_prompt, temperature, max_tokens
