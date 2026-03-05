@@ -81,7 +81,24 @@ with chat_container:
                     st.session_state.messages.pop()
                     st.rerun()    
     
-         
+if prompt := st.chat_input("💭 Ask anything about your files or general questions..."):
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with chat_container:
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+    # Generate response
+    with chat_container:
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = generate_response(
+                prompt, selected_model, provider, 
+                openai_key, gemini_key, claude_key, groq_key,
+                selected_mode, custom_prompt, temperature, max_tokens
+            )
+            message_placeholder.markdown(full_response)
+            st.session_state.messages.append({"role": "assistant", "content": full_response})         
     
 
 ## ==================== CHAT HISTORY MANAGEMENT ====================
