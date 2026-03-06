@@ -1,10 +1,4 @@
-web serach /pdf 
-dark mode/light mode option
-user can upload its own file 
-
-fast api
-
-import streamlit as st
+import streamlit as st 
 from openai import OpenAI
 import google.generativeai as genai
 from anthropic import Anthropic
