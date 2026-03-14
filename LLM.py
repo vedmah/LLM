@@ -167,4 +167,4 @@ if prompt := st.chat_input("💭 Ask anything about your files or general questi
 # Clear chat
 if st.sidebar.button("Clear Chat"):
     st.session_state.messages = []
-    st.rerun()
+    st.rerun() 
