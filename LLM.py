@@ -1,170 +1,170 @@
 import streamlit as st
+from openai import OpenAI
+import google.generativeai as genai
+from anthropic import Anthropic
+from groq import Groq
+from perplexity import Perplexity  # pip install perplexity-ai (official from GitHub)
 import os
-from typing import List, Dict
+from typing import Dict, List, Any
 import json
-import tempfile
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_anthropic import ChatAnthropic
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_chroma import Chroma
-from langchain.schema import StrOutputParser
-from langchain_core.messages import HumanMessage, AIMessage
-import tiktoken  # For token counting
 
 # Page config
-st.set_page_config(page_title="Multi-LLM Chat", layout="wide", page_icon="🤖")
+st.set_page_config(page_title="All-in-One LLM Chatbot", layout="wide", page_icon="🤖")
 
-# Custom CSS
+# Custom CSS for professional look
 st.markdown("""
 <style>
 .chat-model-badge {
     background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    color: white; padding: 0.5rem 1rem; border-radius: 25px;
-    font-weight: bold; font-size: 0.9rem;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin: 0.2rem;
 }
+.stChatMessage {
+    padding: 1rem;
+    border-radius: 15px;
+    margin-bottom: 1rem;
+}
+.user-message { background: #e3f2fd; }
+.assistant-message { background: #f5f5f5; }
 </style>
 """, unsafe_allow_html=True)
 
-# API Keys (use secrets.toml or env vars in production)
-openai_key = st.sidebar.text_input("OpenAI API Key", type="password")
-gemini_key = st.sidebar.text_input("Gemini API Key", type="password")
-claude_key = st.sidebar.text_input("Anthropic API Key", type="password")
-groq_key = st.sidebar.text_input("Groq API Key", type="password")  # Assume for Llama via Groq
-
-# Model selector
-st.sidebar.header("🤖 LLM")
-selected_model = st.sidebar.selectbox(
-    "Choose LLM:",
-    ["gpt-4o-mini", "gemini-pro", "claude-3-5-sonnet-20241022", "llama3-groq-70b-8192-tool-use-preview"]
-)
-
-# Chat Mode
-st.sidebar.header("🎭 Chat Mode")
-selected_mode = st.sidebar.selectbox(
-    "Choose Mode:",
-    ["General Assistant", "Code Helper 💻", "Document Q&A 📄", "Creative Writer ✍️", "Research Analyst 🔬"]
-)
-
-# Files Upload for RAG
-st.sidebar.header("📁 Files Upload")
-uploaded_files = st.sidebar.file_uploader(
-    "Upload Files", type=["pdf", "png", "jpg", "jpeg", "txt"], accept_multiple_files=True
-)
-
 # Initialize session state
-@st.cache_resource
-def init_session():
+@st.cache_data
+def init_session_state():
     if "messages" not in st.session_state:
-        st.session_state.messages = []
-    if "vectorstore" not in st.session_state:
-        st.session_state.vectorstore = None
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = {}
+        st.session_state.messages = {
+            "chatgpt": [],
+            "claude": [],
+            "perplexity": [],
+            "gemini": [],
+            "groq": []
+        }
+    if "current_model" not in st.session_state:
+        st.session_state.current_model = "chatgpt"
 
-init_session()
+init_session_state()
 
-# Process uploaded files for RAG
-if uploaded_files:
-    if st.sidebar.button("Process Files for RAG"):
-        docs = []
-        for file in uploaded_files:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.name)[1]) as tmp:
-                tmp.write(file.getvalue())
-                tmp_path = tmp.name
-            if file.name.endswith('.pdf'):
-                loader = PyPDFLoader(tmp_path)
-            else:
-                loader = UnstructuredLoader(tmp_path)  # Handles images/txt
-            docs.extend(loader.load())
-            os.unlink(tmp_path)
-        
-        # Chunk and embed
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        chunks = splitter.split_documents(docs)
-        embeddings = OpenAIEmbeddings(openai_api_key=openai_key) if openai_key else None
-        
-        if embeddings:
-            st.session_state.vectorstore = Chroma.from_documents(
-                chunks, embeddings, persist_directory="./chroma_db"
-            )
-            st.sidebar.success("✅ Files processed and indexed for RAG!")
-        else:
-            st.sidebar.error("❌ OpenAI key needed for embeddings.")
+# Sidebar for API keys and model selection
+with st.sidebar:
+    st.header("🔑 API Keys")
+    openai_key = st.text_input("OpenAI (ChatGPT)", type="password", key="openai_key")
+    claude_key = st.text_input("Anthropic (Claude)", type="password", key="claude_key")
+    perplexity_key = st.text_input("Perplexity", type="password", key="perplexity_key")
+    gemini_key = st.text_input("Google Gemini", type="password", key="gemini_key")
+    groq_key = st.text_input("Groq", type="password", key="groq_key")
+    
+    st.divider()
+    st.header("🤖 Select Model")
+    models = ["chatgpt", "claude", "perplexity", "gemini", "groq"]
+    selected_model = st.selectbox("Choose LLM:", models, index=models.index(st.session_state.current_model))
+    if selected_model != st.session_state.current_model:
+        st.session_state.current_model = selected_model
+        st.rerun()
+    
+    st.info("💡 Get keys:\n- OpenAI: platform.openai.com\n- Claude: console.anthropic.com\n- Perplexity: perplexity.ai/settings\n- Gemini: aistudio.google.com\n- Groq: console.groq.com")
 
-# Get LLM instance
-@st.cache_resource
-def get_llm(model_name: str):
-    if "gpt" in model_name:
-        return ChatOpenAI(model=model_name, api_key=openai_key, temperature=0.7)
-    elif "gemini" in model_name:
-        return ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=gemini_key, temperature=0.7)
-    elif "claude" in model_name:
-        return ChatAnthropic(model=model_name, api_key=claude_key, temperature=0.7)
-    elif "llama3-groq" in model_name:
-        return ChatOpenAI(model="llama3-groq-70b-8192-tool-use-preview", api_key=groq_key, temperature=0.7)
+# Model clients (lazy init)
+def get_client(model: str) -> Any:
+    if model == "chatgpt":
+        if not openai_key: return None
+        return OpenAI(api_key=openai_key)
+    elif model == "claude":
+        if not claude_key: return None
+        return Anthropic(api_key=claude_key)
+    elif model == "perplexity":
+        if not perplexity_key: return None
+        return Perplexity(api_key=perplexity_key)
+    elif model == "gemini":
+        if not gemini_key: return None
+        genai.configure(api_key=gemini_key)
+        return genai.GenerativeModel('gemini-1.5-pro')
+    elif model == "groq":
+        if not groq_key: return None
+        return Groq(api_key=groq_key)
     return None
 
-llm = get_llm(selected_model)
-
-# RAG Chain if Document Q&A and vectorstore exists
-if selected_mode == "Document Q&A 📄" and st.session_state.vectorstore and llm:
-    retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": 4})
+# Generate response based on model
+async def generate_response(model_name: str, messages: List[Dict]) -> str:
+    client = get_client(model_name)
+    if not client:
+        return "❌ API key missing for this model. Add it in sidebar."
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are a helpful assistant. Answer using ONLY the provided context from documents.
-Context: {context}
-Mode: {mode}"""),
-        MessagesPlaceholder(variable_name="history"),
-        ("human", "{input}")
-    ])
+    try:
+        if model_name == "chatgpt":
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": m["role"], "content": m["content"]} for m in messages[-10:]],
+                max_tokens=1000
+            )
+            return response.choices[0].message.content
+        elif model_name == "claude":
+            msg_history = [{"role": m["role"], "content": m["content"]} for m in messages[-10:]]
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20240620",
+                max_tokens=1000,
+                messages=msg_history
+            )
+            return response.content[0].text
+        elif model_name == "perplexity":
+            response = client.chat.create(
+                model="llama-3.1-sonar-large-128k-online",
+                messages=[{"role": m["role"], "content": m["content"]} for m in messages[-5:]]
+            )
+            return response.choices[0].message.content
+        elif model_name == "gemini":
+            history = ""
+            for m in messages[-10:]:
+                history += f"{m['role']}: {m['content']}\n"
+            response = client.generate_content(history)
+            return response.text
+        elif model_name == "groq":
+            response = client.chat.completions.create(
+                model="llama-3.1-70b-versatile",
+                messages=[{"role": m["role"], "content": m["content"]} for m in messages[-10:]],
+                max_tokens=1000
+            )
+            return response.choices[0].message.content
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+# Main chat interface
+st.title("🤖 All-in-One LLM Chatbot")
+st.markdown(f"**Current Model:** <span class='chat-model-badge'>{st.session_state.current_model.upper()}</span>", unsafe_allow_html=True)
+
+# Display chat history
+current_messages = st.session_state.messages[st.session_state.current_model]
+for i, msg in enumerate(current_messages):
+    with st.chat_message(msg["role"], key=f"msg_{i}"):
+        st.markdown(msg["content"], unsafe_allow_html=True)
+        if msg["role"] == "assistant":
+            st.button("🔄 Regenerate", on_click=lambda: regenerate(i), key=f"regen_{i}")
+
+# Chat input
+if prompt := st.chat_input("Ask anything..."):
+    # Add user message
+    current_messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
     
-    chain = {
-        "input": lambda x: x,
-        "context": retriever,
-        "mode": lambda x: selected_mode,
-        "history": lambda x: st.session_state.chat_history.get(st.session_state.get("session_id", "default"), [])
-    } | prompt | llm | StrOutputParser()
-
-# General response generator (non-RAG)
-def generate_general_response(prompt: str):
-    if not llm:
-        return "Please set API keys and select a model."
+    # Generate and display assistant response
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            response = generate_response(st.session_state.current_model, current_messages)
+            st.markdown(response)
     
-    custom_prompt = f"Mode: {selected_mode}. Respond to: {prompt}"
-    return llm.invoke(custom_prompt).content
+    current_messages.append({"role": "assistant", "content": response})
+    st.rerun()
 
-# Chat UI
-st.title("Multi-LLM Chat")
-chat_container = st.container()
+# Clear chat button
+if st.button("🗑️ Clear Chat History", type="secondary"):
+    st.session_state.messages[st.session_state.current_model] = []
+    st.rerun()
 
-with chat_container:
-    for i, message in enumerate(st.session_state.messages):
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-            if message["role"] == "assistant" and st.button("🔄 Regenerate", key=f"regen_{i}"):
-                st.session_state.messages = st.session_state.messages[:i]
-                st.rerun()
-
-if prompt := st.chat_input("💭 Ask anything about your files or general questions..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with chat_container:
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            if selected_mode == "Document Q&A 📄" and st.session_state.vectorstore:
-                response = chain.invoke(prompt)
-            else:
-                response = generate_general_response(prompt)
-            message_placeholder.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-
-# Clear chat
-if st.sidebar.button("Clear Chat"):
-    st.session_state.messages = []
-    st.rerun() 
+# Footer
+st.markdown("---")
+st.caption("Built for multi-LLM switching with persistent history. Deploy: `streamlit run multi_llm_chat.py` 🚀")
