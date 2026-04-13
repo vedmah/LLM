@@ -7,11 +7,10 @@ import time
 
 # --- CONFIGURATION (Keys hardcoded as requested) ---
 API_KEYS = {
-    "GPT-4o-mini": "YOUR_OPENAI_KEY",
-    "Claude-3-Haiku": "YOUR_ANTHROPIC_KEY",
-    "Gemini-1.5-Flash": "YOUR_GOOGLE_KEY",
-    "Perplexity-Sonar": "YOUR_PERPLEXITY_KEY",
-    "MagicHour-Video": "YOUR_MAGIC_HOUR_KEY" # For Video Generation
+    "GPT-4o-mini": "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",
+    "Claude-3-Haiku": "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",
+    "Gemini-1.5-Flash": "AIzaSyBmPU22hpyfCcy8u0wJiMbj6WGwQii8mWU",
+     
 }
 
 st.set_page_config(page_title="Universal AI Hub 2026", layout="wide")
@@ -38,7 +37,7 @@ with st.sidebar:
 st.header(f"Mode: {mode}")
 
 if mode == "Chat & Files":
-    selected_model = st.selectbox("Select Text Model", ["GPT-4o-mini", "Claude-3-Haiku", "Gemini-1.5-Flash","Perplexity-Sonar","MagicHour-Video"])
+    selected_model = st.selectbox("Select Text Model", ["GPT-4o-mini", "Claude-3-Haiku", "Gemini-1.5-Flash" ])
     
     # Display Chat
     for m in st.session_state.messages:
