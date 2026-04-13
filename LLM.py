@@ -38,7 +38,7 @@ with st.sidebar:
 st.header(f"Mode: {mode}")
 
 if mode == "Chat & Files":
-    selected_model = st.selectbox("Select Text Model", ["GPT-4o-mini", "Claude-3-Haiku", "Gemini-1.5-Flash"])
+    selected_model = st.selectbox("Select Text Model", ["GPT-4o-mini", "Claude-3-Haiku", "Gemini-1.5-Flash","Perplexity-Sonar","MagicHour-Video"])
     
     # Display Chat
     for m in st.session_state.messages:
