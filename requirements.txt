@@ -1,7 +1,6 @@
-streamlit>=1.38.0
-openai>=1.40.0
-google-generativeai>=0.8.3
-anthropic>=0.34.2
-groq>=0.4.1
-perplexity-ai>=1.0.0
-requests>=2.31.0
+streamlit
+openai
+anthropic
+google-generativeai
+requests
+Pillow
