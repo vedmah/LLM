@@ -5,20 +5,15 @@ import google.generativeai as genai
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
-# FIXED IMPORT FOR 2026
 from langchain_text_splitters import RecursiveCharacterTextSplitter 
-
 import tempfile
 import os
- 
+
 # --- 1. CONFIGURATION & SECRETS ---
-# Note: Ensure these keys are set in Streamlit Cloud "Secrets" or local .streamlit/secrets.toml
 API_KEYS = {
-    "GPT-4o-mini": st.secrets.get("OPENAI_KEY", "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" ),
-    "Claude-3-Haiku": st.secrets.get("ANTHROPIC_KEY", " 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" ),
+    "Groq-Llama-4": st.secrets.get("GROQ_KEY", "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"),
+    "Claude-3-Haiku": st.secrets.get("ANTHROPIC_KEY", "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"),
     "gemini-3-flash-preview": st.secrets.get("GOOGLE_KEY", "AIzaSyBmPU22hpyfCcy8u0wJiMbj6WGwQii8mWU"),
-     
 }
 
 st.set_page_config(page_title="Universal AI Hub 2026", layout="wide")
@@ -28,9 +23,14 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "artifacts" not in st.session_state:
     st.session_state.artifacts = {}
+if "vectorstore" not in st.session_state:
+    st.session_state.vectorstore = None
+if "uploaded_pdf" not in st.session_state:
+    st.session_state.uploaded_pdf = None
 
 # --- 3. HELPER FUNCTIONS (RAG & UTILS) ---
-def process_pdf_rag(uploaded_file):
+@st.cache_resource
+def process_pdf_rag(uploaded_file, google_api_key):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(uploaded_file.getvalue())
         tmp_path = tmp.name
@@ -42,11 +42,17 @@ def process_pdf_rag(uploaded_file):
     
     embeddings = GoogleGenerativeAIEmbeddings(
         model="models/embedding-001", 
-        google_api_key=API_KEYS["Gemini-1.5-Flash"]
+        google_api_key=google_api_key
     )
     vectorstore = FAISS.from_documents(docs, embeddings)
     os.remove(tmp_path)
     return vectorstore
+
+def get_rag_context(vectorstore, prompt):
+    if vectorstore is None:
+        return ""
+    search_results = vectorstore.similarity_search(prompt, k=3)
+    return "\n".join([d.page_content for d in search_results])
 
 # --- 4. SIDEBAR NAVIGATION ---
 with st.sidebar:
@@ -55,16 +61,27 @@ with st.sidebar:
     
     st.divider()
     st.subheader("📁 Attachments")
-    uploaded_file = st.file_uploader("Upload PDF, Image, or Video", type=['pdf', 'png', 'jpg', 'mp4'])
+    uploaded_file = st.file_uploader("Upload PDF for RAG", type=['pdf'], key="pdf_uploader")
+    
+    if uploaded_file is not None and uploaded_file != st.session_state.uploaded_pdf:
+        if "gemini-3-flash-preview" in API_KEYS:
+            with st.status("Processing PDF with RAG..."):
+                st.session_state.vectorstore = process_pdf_rag(uploaded_file, API_KEYS["gemini-3-flash-preview"])
+                st.session_state.uploaded_pdf = uploaded_file
+                st.success("PDF processed! RAG ready.")
+        else:
+            st.warning("Upload Google API key in secrets for RAG.")
     
     if st.button("🗑️ Clear Chat"):
         st.session_state.messages = []
+        st.session_state.vectorstore = None
+        st.session_state.uploaded_pdf = None
         st.rerun()
 
     st.divider()
     st.subheader("📦 Recent Artifacts")
     for name in st.session_state.artifacts.keys():
-        if st.button(f"📄 {name}", key=name):
+        if st.button(f"📄 {name}", key=f"art_{name}"):
             st.info("Artifact content is stored in memory.")
 
 # --- 5. MAIN INTERFACE ---
@@ -76,78 +93,86 @@ if mode == "💬 Multi-Chat + RAG":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-if prompt := st.chat_input("Say something..."):    
-    # 1. Immediately show user message
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    # Chat Input & Response Generation
+    if prompt := st.chat_input("Say something..."):    
+        # Add user message immediately
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-    # 2. Generate response with visible status
-    with st.chat_message("assistant"):
-        with st.status("Thinking...", expanded=True) as status:
-            try:
-                # ROUTING LOGIC HERE
-                # ... 
-                status.update(label="Response Complete!", state="complete", expanded=False)
-                st.markdown(res_text)
-                st.session_state.messages.append({"role": "assistant", "content": res_text})
-            except Exception as e:
-                status.update(label="Error!", state="error")
-                st.error(f"Something went wrong: {e}")
-         
+        # Generate assistant response
+        with st.chat_message("assistant"):
+            status = st.status("Thinking...", expanded=True)
             
-            # --- RAG Logic Integration ---
-            if uploaded_file and uploaded_file.type == "application/pdf":
-                with st.status("Reading PDF with RAG..."):
-                    vs = process_pdf_rag(uploaded_file)
-                    search_results = vs.similarity_search(prompt, k=3)
-                    context = "\n".join([d.page_content for d in search_results])
-                    prompt = f"Using this context:\n{context}\n\nQuestion: {prompt}"
-
-            # --- API Routing ---
             try:
-                if "Gemini" in selected_model:
+                # RAG Context
+                rag_context = get_rag_context(st.session_state.vectorstore, prompt)
+                if rag_context:
+                    full_prompt = f"Context from documents:\n{rag_context}\n\nUser Question: {prompt}"
+                else:
+                    full_prompt = prompt
+                
+                # Build full conversation history for context
+                messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+                
+                # API Routing
+                if "gemini" in selected_model.lower():
                     genai.configure(api_key=API_KEYS["gemini-3-flash-preview"])
-                    model = genai.GenerativeModel('gemini-3-flash-preview') 
-                    response = model.generate_content(prompt)
+                    model = genai.GenerativeModel('gemini-3-flash-preview')
+                    response = model.generate_content(full_prompt)
                     res_text = response.text
 
-                elif "GPT" in selected_model:
-                    client = openai.OpenAI(api_key=API_KEYS["GPT-4o-mini"])
+                elif "Groq" in selected_model:
+                    client = Groq(api_key=API_KEYS["Groq-Llama-4"])
                     response = client.chat.completions.create(
-                        model="gpt-4o-mini",
+                        model="meta-llama/llama-4-scout-17b-16e-instruct",  
                         messages=[{"role": "user", "content": prompt}]
                     )
                     res_text = response.choices[0].message.content
 
-                elif "Claude" in selected_model:
+                elif "claude" in selected_model.lower():
                     client = anthropic.Anthropic(api_key=API_KEYS["Claude-3-Haiku"])
                     response = client.messages.create(
-                        model="claude-3-haiku-20240307",
+                        model="claude-3-haiku-4-5-20251001",  # Updated 2026 model ID
                         max_tokens=1024,
-                        messages=[{"role": "user", "content": prompt}]
+                        messages=[{"role": "user", "content": full_prompt}]
                     )
                     res_text = response.content[0].text
 
+                status.update(label="Response Complete!", state="complete", expanded=False)
                 st.markdown(res_text)
+                
+                # Save to history
                 st.session_state.messages.append({"role": "assistant", "content": res_text})
                 
-                # Auto-Artifact Creation (if code is detected)
+                # Auto-Artifact for code
                 if "```" in res_text:
                     art_name = f"Code_{len(st.session_state.artifacts)+1}"
                     st.session_state.artifacts[art_name] = res_text
+                    st.info(f"💾 Code saved as artifact: {art_name}")
 
             except Exception as e:
+                status.update(label="Error!", state="error")
                 st.error(f"API Error: {str(e)}")
 
 elif mode == "🎨 Image Gen":
-    img_prompt = st.text_area("Describe the image you want to create...")
+    st.header("Image Generation (Coming Soon)")
+    img_prompt = st.text_area("Describe the image...")
     if st.button("Generate Image"):
-        st.info("Using Gemini 2.5 Flash Image Engine...")
-        # Image generation logic call here...
+        st.info("Image gen logic to be implemented with Gemini/DALL-E.")
 
 elif mode == "🎬 Video Gen":
+    st.header("Video Generation (Coming Soon)")
     vid_prompt = st.text_input("Describe the video scene...")
     if st.button("Generate Video"):
-        st.info("Sending request to Magic Hour API...")
-        # Video generation logic call here...
+        st.info("Video gen logic to be implemented.")
+
+# Instructions
+with st.expander("📋 Setup Instructions"):
+    st.markdown("""
+     
+       pip install streamlit openai anthropic google-generativeai langchain-community langchain-google-genai langchain-text-splitters faiss-cpu pypdf
+       ```
+    3. **Run**: `streamlit run app.py`
+    4. **RAG**: Upload PDF → Auto-processes → Context injected automatically.
+    """)
