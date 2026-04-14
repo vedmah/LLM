@@ -50,7 +50,7 @@ def process_pdf_rag(uploaded_file):
 
 # --- 4. SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.title("🚀 Omni-Bot Pro")
+    st.title("🚀 Multi-AIChatbot Pro")
     mode = st.radio("Switch Mode", ["💬 Multi-Chat + RAG", "🎨 Image Gen", "🎬 Video Gen"])
     
     st.divider()
