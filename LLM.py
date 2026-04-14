@@ -171,8 +171,4 @@ elif mode == "🎬 Video Gen":
 with st.expander("📋 Setup Instructions"):
     st.markdown("""
      
-       pip install streamlit openai anthropic google-generativeai langchain-community langchain-google-genai langchain-text-splitters faiss-cpu pypdf
-       ```
-    3. **Run**: `streamlit run app.py`
-    4. **RAG**: Upload PDF → Auto-processes → Context injected automatically.
-    """)
+        
