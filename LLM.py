@@ -8,7 +8,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import tempfile
 import os
-
+ 
 # --- 1. CONFIGURATION & SECRETS ---
 # Note: Ensure these keys are set in Streamlit Cloud "Secrets" or local .streamlit/secrets.toml
 API_KEYS = {
