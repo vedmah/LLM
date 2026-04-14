@@ -4,3 +4,7 @@ anthropic
 google-generativeai
 requests
 Pillow
+langchain
+langchain-community
+faiss-cpu
+pypdf
