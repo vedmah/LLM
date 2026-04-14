@@ -17,8 +17,8 @@ import tempfile
 # 🔥 BUILT-IN API KEYS - REPLACE THESE
 # ========================================
 API_KEYS = {
-    "groq": "gsk_your_free_groq_key_here...",  # https://console.groq.com/keys (FREE)
-    "google": "AIzaSy_your_free_gemini_key...",  # https://aistudio.google.com/app/apikey (FREE)
+    "groq": "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",  # https://console.groq.com/keys (FREE)
+    "google": "AIzaSyBmPU22hpyfCcy8u0wJiMbj6WGwQii8mWU",  # https://aistudio.google.com/app/apikey (FREE)
     "openai": "sk-proj_your_openai_key...",  # Optional
     "anthropic": "sk-ant-api03_your_claude_key..."  # Optional
 }
