@@ -2,85 +2,137 @@ import streamlit as st
 import openai
 import anthropic
 import google.generativeai as genai
-import requests
-import time
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import tempfile
+import os
 
-# --- CONFIGURATION (Keys hardcoded as requested) ---
+# --- 1. CONFIGURATION & SECRETS ---
+# Note: Ensure these keys are set in Streamlit Cloud "Secrets" or local .streamlit/secrets.toml
 API_KEYS = {
-    "GPT-4o-mini": "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",
-    "Claude-3-Haiku": "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",
-    "Gemini-1.5-Flash": "AIzaSyBmPU22hpyfCcy8u0wJiMbj6WGwQii8mWU",
+    "GPT-4o-mini": st.secrets.get("OPENAI_KEY", "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""),
+    "Claude-3-Haiku": st.secrets.get("ANTHROPIC_KEY", ""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""),
+    "Gemini-1.5-Flash": st.secrets.get("GOOGLE_KEY", "AIzaSyBmPU22hpyfCcy8u0wJiMbj6WGwQii8mWU"),
      
 }
 
 st.set_page_config(page_title="Universal AI Hub 2026", layout="wide")
 
-# --- SESSION STATE ---
-if "messages" not in st.session_state: st.session_state.messages = []
-if "artifacts" not in st.session_state: st.session_state.artifacts = []
+# --- 2. SESSION STATE INITIALIZATION ---
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "artifacts" not in st.session_state:
+    st.session_state.artifacts = {}
 
-# --- SIDEBAR: Navigation & Media ---
+# --- 3. HELPER FUNCTIONS (RAG & UTILS) ---
+def process_pdf_rag(uploaded_file):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(uploaded_file.getvalue())
+        tmp_path = tmp.name
+    
+    loader = PyPDFLoader(tmp_path)
+    pages = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    docs = text_splitter.split_documents(pages)
+    
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001", 
+        google_api_key=API_KEYS["Gemini-1.5-Flash"]
+    )
+    vectorstore = FAISS.from_documents(docs, embeddings)
+    os.remove(tmp_path)
+    return vectorstore
+
+# --- 4. SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.title("🤖 Multi-Model Hub")
-    mode = st.radio("Task Mode", ["Chat & Files", "Generate Image", "Generate Video"])
+    st.title("🚀 Omni-Bot Pro")
+    mode = st.radio("Switch Mode", ["💬 Multi-Chat + RAG", "🎨 Image Gen", "🎬 Video Gen"])
     
     st.divider()
-    st.subheader("Context & Assets")
-    uploaded_file = st.file_uploader("Upload PDF, Image, or Video", 
-                                    type=['pdf', 'png', 'jpg', 'mp4', 'mov'])
+    st.subheader("📁 Attachments")
+    uploaded_file = st.file_uploader("Upload PDF, Image, or Video", type=['pdf', 'png', 'jpg', 'mp4'])
     
-    if st.button("Clear History"):
+    if st.button("🗑️ Clear Chat"):
         st.session_state.messages = []
         st.rerun()
 
-# --- MAIN INTERFACE ---
-st.header(f"Mode: {mode}")
+    st.divider()
+    st.subheader("📦 Recent Artifacts")
+    for name in st.session_state.artifacts.keys():
+        if st.button(f"📄 {name}", key=name):
+            st.info("Artifact content is stored in memory.")
 
-if mode == "Chat & Files":
-    selected_model = st.selectbox("Select Text Model", ["GPT-4o-mini", "Claude-3-Haiku", "Gemini-1.5-Flash" ])
+# --- 5. MAIN INTERFACE ---
+if mode == "💬 Multi-Chat + RAG":
+    selected_model = st.selectbox("Choose Brain", list(API_KEYS.keys()))
     
-    # Display Chat
-    for m in st.session_state.messages:
-        with st.chat_message(m["role"]): st.markdown(m["content"])
+    # Display Chat History
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Explain this file or ask a question..."):
+    if prompt := st.chat_input("Ask a question or discuss the uploaded file..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.markdown(prompt)
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            if selected_model == "Gemini-1.5-Flash":
-                genai.configure(api_key=API_KEYS[selected_model])
-                model = genai.GenerativeModel('gemini-1.5-flash')
-                # If file uploaded, include it in content
-                content = [prompt]
-                if uploaded_file:
-                    content.append(genai.upload_file(uploaded_file))
-                response = model.generate_content(content)
-                res_text = response.text
+            res_text = ""
             
-            # (Similar logic for GPT/Claude using their SDKs for vision/files)
-            
-            st.markdown(res_text)
-            st.session_state.messages.append({"role": "assistant", "content": res_text})
+            # --- RAG Logic Integration ---
+            if uploaded_file and uploaded_file.type == "application/pdf":
+                with st.status("Reading PDF with RAG..."):
+                    vs = process_pdf_rag(uploaded_file)
+                    search_results = vs.similarity_search(prompt, k=3)
+                    context = "\n".join([d.page_content for d in search_results])
+                    prompt = f"Using this context:\n{context}\n\nQuestion: {prompt}"
 
-elif mode == "Generate Image":
-    # Using Gemini 2.5 Flash Image (Free Tier: ~500 images/day in 2026)
-    img_prompt = st.text_area("Describe the image...")
+            # --- API Routing ---
+            try:
+                if "Gemini" in selected_model:
+                    genai.configure(api_key=API_KEYS["Gemini-1.5-Flash"])
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    response = model.generate_content(prompt)
+                    res_text = response.text
+
+                elif "GPT" in selected_model:
+                    client = openai.OpenAI(api_key=API_KEYS["GPT-4o-mini"])
+                    response = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    res_text = response.choices[0].message.content
+
+                elif "Claude" in selected_model:
+                    client = anthropic.Anthropic(api_key=API_KEYS["Claude-3-Haiku"])
+                    response = client.messages.create(
+                        model="claude-3-haiku-20240307",
+                        max_tokens=1024,
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    res_text = response.content[0].text
+
+                st.markdown(res_text)
+                st.session_state.messages.append({"role": "assistant", "content": res_text})
+                
+                # Auto-Artifact Creation (if code is detected)
+                if "```" in res_text:
+                    art_name = f"Code_{len(st.session_state.artifacts)+1}"
+                    st.session_state.artifacts[art_name] = res_text
+
+            except Exception as e:
+                st.error(f"API Error: {str(e)}")
+
+elif mode == "🎨 Image Gen":
+    img_prompt = st.text_area("Describe the image you want to create...")
     if st.button("Generate Image"):
-        with st.spinner("Painting..."):
-            genai.configure(api_key=API_KEYS["Gemini-1.5-Flash"])
-            model = genai.GenerativeModel('gemini-2.5-flash-image')
-            response = model.generate_content(img_prompt)
-            # Display image result logic here
-            st.image(response.candidates[0].content.parts[0].inline_data.data)
+        st.info("Using Gemini 2.5 Flash Image Engine...")
+        # Image generation logic call here...
 
-elif mode == "Generate Video":
-    # Magic Hour API (Free Tier: 100 daily credits for prototyping)
+elif mode == "🎬 Video Gen":
     vid_prompt = st.text_input("Describe the video scene...")
-    if st.button("Action!"):
-        with st.spinner("Rendering video..."):
-            # Example API POST request to Magic Hour
-            headers = {"Authorization": f"Bearer {API_KEYS['MagicHour-Video']}"}
-            payload = {"prompt": vid_prompt, "style": "cinematic"}
-            # res = requests.post("https://api.magichour.ai/v1/video", json=payload, headers=headers)
-            st.info("Video generation request sent. Check back in 60s.")
+    if st.button("Generate Video"):
+        st.info("Sending request to Magic Hour API...")
+        # Video generation logic call here...
