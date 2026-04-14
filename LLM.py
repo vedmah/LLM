@@ -76,7 +76,7 @@ if mode == "💬 Multi-Chat + RAG":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Say something..."):
+if prompt := st.chat_input("Say something..."):    
     # 1. Immediately show user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
