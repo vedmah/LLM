@@ -11,7 +11,7 @@ pypdf
 tiktoken 
 Pillow
 requests
- 
+RecursiveCharacterTextSplitter 
 
  
 
