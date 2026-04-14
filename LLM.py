@@ -95,8 +95,8 @@ if mode == "💬 Multi-Chat + RAG":
             # --- API Routing ---
             try:
                 if "Gemini" in selected_model:
-                    genai.configure(api_key=API_KEYS["Gemini-1.5-Flash"])
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    genai.configure(api_key=API_KEYS["gemini-3-flash-preview"])
+                    model = genai.GenerativeModel('gemini-3-flash-preview') 
                     response = model.generate_content(prompt)
                     res_text = response.text
 
