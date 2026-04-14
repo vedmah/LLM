@@ -12,8 +12,8 @@ import os
 # --- 1. CONFIGURATION & SECRETS ---
 # Note: Ensure these keys are set in Streamlit Cloud "Secrets" or local .streamlit/secrets.toml
 API_KEYS = {
-    "GPT-4o-mini": st.secrets.get("OPENAI_KEY", "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""),
-    "Claude-3-Haiku": st.secrets.get("ANTHROPIC_KEY", ""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""),
+    "GPT-4o-mini": st.secrets.get("OPENAI_KEY", "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" ),
+    "Claude-3-Haiku": st.secrets.get("ANTHROPIC_KEY", " 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" ),
     "Gemini-1.5-Flash": st.secrets.get("GOOGLE_KEY", "AIzaSyBmPU22hpyfCcy8u0wJiMbj6WGwQii8mWU"),
      
 }
