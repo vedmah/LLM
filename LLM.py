@@ -94,8 +94,7 @@ if prompt := st.chat_input("Say something..."):
             except Exception as e:
                 status.update(label="Error!", state="error")
                 st.error(f"Something went wrong: {e}")
-        with st.chat_message("assistant"):
-            res_text = ""
+         
             
             # --- RAG Logic Integration ---
             if uploaded_file and uploaded_file.type == "application/pdf":
