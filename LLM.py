@@ -76,11 +76,24 @@ if mode == "💬 Multi-Chat + RAG":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Ask a question or discuss the uploaded file..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    if prompt := st.chat_input("Say something..."):
+    # 1. Immediately show user message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
+    # 2. Generate response with visible status
+    with st.chat_message("assistant"):
+        with st.status("Thinking...", expanded=True) as status:
+            try:
+                # ROUTING LOGIC HERE
+                # ... 
+                status.update(label="Response Complete!", state="complete", expanded=False)
+                st.markdown(res_text)
+                st.session_state.messages.append({"role": "assistant", "content": res_text})
+            except Exception as e:
+                status.update(label="Error!", state="error")
+                st.error(f"Something went wrong: {e}")
         with st.chat_message("assistant"):
             res_text = ""
             
