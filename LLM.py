@@ -167,8 +167,5 @@ elif mode == "🎬 Video Gen":
     if st.button("Generate Video"):
         st.info("Video gen logic to be implemented.")
 
-# Instructions
-with st.expander("📋 Setup Instructions"):
-    st.markdown("""
-     
+ 
         
